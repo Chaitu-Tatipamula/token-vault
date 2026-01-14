@@ -13,6 +13,7 @@ A production-ready ERC-4626 compliant vault system with multi-strategy routing, 
 |----------|---------|---------------|
 | **TokenMetricsVault** | `0xd2c159Ba0a32F96F2a0d60D569D47b5657582176` | [View on Hyperscan](https://www.hyperscan.com/address/0xd2c159ba0a32f96f2a0d60d569d47b5657582176) |
 | **HyperCoreStrategy** | `0x31d3e58a53DcbD61B3756457b10F4C99b49d40C0` | [View on Hyperscan](https://www.hyperscan.com/address/0x31d3e58a53dcbd61b3756457b10f4c99b49d40c0) |
+| **MockStrategy** | `0xe5b3f0f17a2a79cbd521d5e47cd6736a704f5e5c` | [View on Hyperscan](https://www.hyperscan.com/address/0xe5b3f0f17a2a79cbd521d5e47cd6736a704f5e5c) |
 | **MockUSDC** | `0xA4b67922E19f5c3b7e04f36A13E7eCF87FA9B374` | [View on Hyperscan](https://www.hyperscan.com/address/0xa4b67922e19f5c3b7e04f36a13e7ecf87fa9b374) |
 | **MockHyperCore** | `0x9A5d351d16c10cEDd984085C568018982275a7d8` | [View on Hyperscan](https://www.hyperscan.com/address/0x9a5d351d16c10cedd984085c568018982275a7d8) |
 
@@ -81,6 +82,26 @@ A production-ready ERC-4626 compliant vault system with multi-strategy routing, 
 **Tx Hash**: [0x1b102f249bf4a9ff27c4e7b2090c5acff5e73165aebc8bd075a6c01b4c150302](https://www.hyperscan.com/tx/0x1b102f249bf4a9ff27c4e7b2090c5acff5e73165aebc8bd075a6c01b4c150302)
 - **Block**: 24,568,475
 - **Gas Used**: 52,477
+
+### 8. Deploy MockStrategy (Generic)
+**Tx Hash**: [0xfc831a8da49aac6495984f821a10ac3ccb5b096c28e116d82f174c7f06464084](https://www.hyperscan.com/tx/0xfc831a8da49aac6495984f821a10ac3ccb5b096c28e116d82f174c7f06464084)
+- **Block**: 24,579,764
+- **Gas Used**: 456,127
+
+### 9. Add MockStrategy to Vault
+**Tx Hash**: [0x5939a7c388db4562c413b7ef26acbb4adabb0ad75ab5b966452c2ac10a0b9ce2](https://www.hyperscan.com/tx/0x5939a7c388db4562c413b7ef26acbb4adabb0ad75ab5b966452c2ac10a0b9ce2)
+- **Block**: 24,579,764
+- **Gas Used**: 77,327
+
+### 10. Set MockStrategy Allocation (30%)
+**Tx Hash**: [0x90c3bfb7135b18f68f35c7dca95e480af8ec477a9c16153eef872df290b0ef77](https://www.hyperscan.com/tx/0x90c3bfb7135b18f68f35c7dca95e480af8ec477a9c16153eef872df290b0ef77)
+- **Block**: 24,579,764
+- **Gas Used**: 52,477
+
+### 11. Approve Vault (MockStrategy)
+**Tx Hash**: [0xc841170cdf7532909b3fa8dba12407b3555fb233fea706c567b5bf1770ed74f9](https://www.hyperscan.com/tx/0xc841170cdf7532909b3fa8dba12407b3555fb233fea706c567b5bf1770ed74f9)
+- **Block**: 24,579,764
+- **Gas Used**: 46,323
 
 ---
 
