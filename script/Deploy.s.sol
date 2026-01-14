@@ -22,7 +22,7 @@ contract DeployVault is Script {
         // // 2. Deploy Mock HyperCore (to receive Action ID 2)
         MockHyperCore coreWriter = new MockHyperCore();
         console.log("MockHyperCore deployed at:", address(coreWriter));
-        
+
         // 3. Deploy Vault
         TokenMetricsVault vault = new TokenMetricsVault(IERC20(address(usdc)), deployerAddr);
         vault.setMaxAllocation(10000); // Allow 100% allocation
@@ -35,7 +35,7 @@ contract DeployVault is Script {
         // 5. Wire up the system
         // Add Strategy
         vault.addStrategy(address(hcStrat));
-        
+
         // Set Allocation (e.g. 50% for now)
         vault.setAllocation(address(hcStrat), 5000);
         console.log("System wired up: Strategy added and allocated 50%");

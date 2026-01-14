@@ -29,7 +29,7 @@ contract MockStrategy is Ownable {
         require(msg.sender == owner() || approvedWithdrawers[msg.sender], "Strategy: Unauthorized");
         require(block.timestamp >= lockupEnd, "Strategy: Locked");
         require(amount <= totalAssets, "Strategy: Insufficient funds");
-        
+
         totalAssets -= amount;
         asset.transfer(msg.sender, amount);
     }

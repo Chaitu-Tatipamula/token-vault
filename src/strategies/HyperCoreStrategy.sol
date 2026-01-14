@@ -13,7 +13,7 @@ import {ICoreWriter} from "../interfaces/ICoreWriter.sol";
 contract HyperCoreStrategy is Ownable {
     IERC20 public asset;
     ICoreWriter public coreWriter;
-    
+
     /// @notice Tracks total assets deposited into the strategy (simulated).
     uint256 public totalAssets;
 
@@ -44,18 +44,18 @@ contract HyperCoreStrategy is Ownable {
     function deposit(uint256 amount) external {
         require(amount > 0, "Amount > 0");
         asset.transferFrom(msg.sender, address(this), amount);
-        
+
         // Prepare params for HyperCore Action 2 (Deposit)
         // Format: abi.encode(amount, destination)
         bytes memory params = abi.encode(amount, address(this));
-        
+
         // Approve CoreWriter to spend tokens if needed (depending on implementation)
         // safeApprove or just standard approve
-        asset.approve(address(coreWriter), amount); 
-        
+        asset.approve(address(coreWriter), amount);
+
         // Execute the action on HyperCore
-        coreWriter.ensureAction(2, params); 
-        
+        coreWriter.ensureAction(2, params);
+
         totalAssets += amount;
     }
 

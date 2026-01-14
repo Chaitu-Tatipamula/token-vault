@@ -12,8 +12,5 @@ interface ICoreWriter {
      * @param actionId The ID of the action to execute (e.g., 2 for HLP Deposit).
      * @param params ABI-encoded parameters specific to the action ID.
      */
-    function ensureAction(
-        uint256 actionId,
-        bytes calldata params
-    ) external payable;
+    function ensureAction(uint256 actionId, bytes calldata params) external payable;
 }

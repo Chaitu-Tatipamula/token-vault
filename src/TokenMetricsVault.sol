@@ -15,7 +15,6 @@ interface IStrategy {
     function totalAssets() external view returns (uint256);
 }
 
-
 /**
  * @title TokenMetricsVault
  * @notice An ERC-4626 compliant vault with multi-strategy routing and a withdrawal queue.
@@ -29,30 +28,30 @@ contract TokenMetricsVault is ERC4626, AccessControl, Pausable, ReentrancyGuard 
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     struct StrategyInfo {
-        bool isActive;          /// @dev Whether the strategy is approved for use.
-        uint256 allocationBps;  /// @dev Target allocation in basis points (10000 = 100%).
+        bool isActive; /// @dev Whether the strategy is approved for use.
+        uint256 allocationBps; /// @dev Target allocation in basis points (10000 = 100%).
     }
 
     /// @notice List of all added strategies.
     address[] public strategies;
-    
+
     /// @notice Mapping of strategy address to configuration info.
     mapping(address => StrategyInfo) public strategyInfo;
-    
+
     // --- Withdrawal Queue Structs ---
     struct WithdrawalRequest {
-        uint256 shares;          /// @dev Shares burned for this request.
-        uint256 assets;          /// @dev Assets expected (locked at request time).
+        uint256 shares; /// @dev Shares burned for this request.
+        uint256 assets; /// @dev Assets expected (locked at request time).
         uint256 claimableAssets; /// @dev Amount currently available to claim.
-        uint256 requestTime;     /// @dev Timestamp when request was made.
-        bool processed;          /// @dev Whether the request is fully satisfied.
+        uint256 requestTime; /// @dev Timestamp when request was made.
+        bool processed; /// @dev Whether the request is fully satisfied.
     }
 
     /// @notice Queue of withdrawal requests per user.
     mapping(address => WithdrawalRequest[]) public withdrawalQueue;
-    
+
     /// @notice Amount of assets currently ready to be claimed by a specific user.
-    mapping(address => uint256) public userClaimableAssets; 
+    mapping(address => uint256) public userClaimableAssets;
 
     // --- Events ---
     event StrategyAdded(address indexed strategy);
@@ -96,14 +95,14 @@ contract TokenMetricsVault is ERC4626, AccessControl, Pausable, ReentrancyGuard 
      */
     function totalAssets() public view override returns (uint256) {
         uint256 assets = IERC20(asset()).balanceOf(address(this));
-        
+
         uint256 len = strategies.length;
         for (uint256 i = 0; i < len; i++) {
             if (strategyInfo[strategies[i]].isActive) {
                 assets += IStrategy(strategies[i]).totalAssets();
             }
         }
-        
+
         uint256 allClaimable = getTotalClaimable();
         if (assets >= allClaimable) {
             return assets - allClaimable;
@@ -118,7 +117,7 @@ contract TokenMetricsVault is ERC4626, AccessControl, Pausable, ReentrancyGuard 
     function getTotalClaimable() public view returns (uint256 total) {
         return _totalClaimableAssets;
     }
-    
+
     // --- Strategy Management ---
 
     /**
@@ -151,7 +150,7 @@ contract TokenMetricsVault is ERC4626, AccessControl, Pausable, ReentrancyGuard 
     function rebalance() external onlyRole(MANAGER_ROLE) {
         uint256 totalVaultAssets = totalAssets();
         uint256 idle = IERC20(asset()).balanceOf(address(this)) - _totalClaimableAssets;
-        
+
         uint256 len = strategies.length;
         for (uint256 i = 0; i < len; i++) {
             address str = strategies[i];
@@ -159,12 +158,12 @@ contract TokenMetricsVault is ERC4626, AccessControl, Pausable, ReentrancyGuard 
             if (info.isActive && info.allocationBps > 0) {
                 uint256 currentStratAssets = IStrategy(str).totalAssets();
                 uint256 target = (totalVaultAssets * info.allocationBps) / 10000;
-                
+
                 if (currentStratAssets < target) {
                     uint256 diff = target - currentStratAssets;
                     // Cap deposit at available idle
                     uint256 amountToDeposit = idle >= diff ? diff : idle;
-                    
+
                     if (amountToDeposit > 0) {
                         IERC20(asset()).approve(str, amountToDeposit);
                         IStrategy(str).deposit(amountToDeposit);
@@ -185,29 +184,29 @@ contract TokenMetricsVault is ERC4626, AccessControl, Pausable, ReentrancyGuard 
      */
     function withdraw(uint256 assets, address receiver, address owner) public override whenNotPaused returns (uint256) {
         uint256 idle = IERC20(asset()).balanceOf(address(this)) - _totalClaimableAssets;
-        
+
         if (idle < assets) {
             uint256 needed = assets - idle;
             uint256 len = strategies.length;
             for (uint256 i = 0; i < len; i++) {
                 if (needed == 0) break;
                 address str = strategies[i];
-                 try IStrategy(str).withdraw(needed) {
-                     uint256 pulled = IERC20(asset()).balanceOf(address(this)) - _totalClaimableAssets - idle;
-                     if (pulled >= needed) {
-                         needed = 0;
-                     } else {
-                         needed -= pulled;
-                     }
-                 } catch {
-                     // Continue to next strategy if this one fails/locks
-                 }
+                try IStrategy(str).withdraw(needed) {
+                    uint256 pulled = IERC20(asset()).balanceOf(address(this)) - _totalClaimableAssets - idle;
+                    if (pulled >= needed) {
+                        needed = 0;
+                    } else {
+                        needed -= pulled;
+                    }
+                } catch {
+                    // Continue to next strategy if this one fails/locks
+                }
             }
             require(needed == 0, "Insufficient liquidity. Use requestWithdrawal.");
         }
         return super.withdraw(assets, receiver, owner);
     }
-    
+
     /**
      * @notice Requests a withdrawal when liquidity is insufficient.
      * @dev Burns shares immediately to lock in value, then queues request.
@@ -215,18 +214,16 @@ contract TokenMetricsVault is ERC4626, AccessControl, Pausable, ReentrancyGuard 
      */
     function requestWithdrawal(uint256 assets) external nonReentrant whenNotPaused {
         uint256 shares = previewWithdraw(assets);
-        _burn(msg.sender, shares); 
-        
+        _burn(msg.sender, shares);
+
         userClaimableAssets[msg.sender] += assets;
         _totalClaimableAssets += assets;
-        
-        withdrawalQueue[msg.sender].push(WithdrawalRequest({
-            shares: shares,
-            assets: assets,
-            claimableAssets: assets,
-            requestTime: block.timestamp,
-            processed: false
-        }));
+
+        withdrawalQueue[msg.sender].push(
+            WithdrawalRequest({
+                shares: shares, assets: assets, claimableAssets: assets, requestTime: block.timestamp, processed: false
+            })
+        );
 
         emit WithdrawalRequested(msg.sender, shares, assets);
     }
@@ -237,13 +234,13 @@ contract TokenMetricsVault is ERC4626, AccessControl, Pausable, ReentrancyGuard 
     function claimWithdrawal() external nonReentrant whenNotPaused {
         uint256 amount = userClaimableAssets[msg.sender];
         require(amount > 0, "Nothing to claim");
-        
+
         uint256 idle = IERC20(asset()).balanceOf(address(this));
         require(idle >= amount, "Vault still illiquid");
-        
+
         userClaimableAssets[msg.sender] = 0;
         _totalClaimableAssets -= amount;
-        
+
         IERC20(asset()).transfer(msg.sender, amount);
         emit WithdrawalClaimed(msg.sender, amount);
     }
@@ -255,22 +252,22 @@ contract TokenMetricsVault is ERC4626, AccessControl, Pausable, ReentrancyGuard 
     function replenishLiquidity(uint256 amount) external onlyRole(MANAGER_ROLE) {
         uint256 needed = amount;
         uint256 len = strategies.length;
-        
+
         for (uint256 i = 0; i < len; i++) {
             if (needed == 0) break;
             address str = strategies[i];
-            
+
             uint256 balanceBefore = IERC20(asset()).balanceOf(address(this));
-             try IStrategy(str).withdraw(needed) {
-                 uint256 balanceAfter = IERC20(asset()).balanceOf(address(this));
-                 uint256 pulled = balanceAfter - balanceBefore;
-                 if (pulled >= needed) {
-                     needed = 0;
-                 } else {
-                     needed -= pulled;
-                 }
-             } catch {}
-         }
+            try IStrategy(str).withdraw(needed) {
+                uint256 balanceAfter = IERC20(asset()).balanceOf(address(this));
+                uint256 pulled = balanceAfter - balanceBefore;
+                if (pulled >= needed) {
+                    needed = 0;
+                } else {
+                    needed -= pulled;
+                }
+            } catch {}
+        }
     }
 
     function pause() external onlyRole(MANAGER_ROLE) {
@@ -284,7 +281,7 @@ contract TokenMetricsVault is ERC4626, AccessControl, Pausable, ReentrancyGuard 
     function _emitSnapshot() internal {
         uint256 price = 0;
         if (totalSupply() > 0) {
-            price = convertToAssets(10**decimals());
+            price = convertToAssets(10 ** decimals());
         }
         emit SharePriceSnapshot(block.timestamp, price, totalAssets(), totalSupply());
     }
@@ -303,7 +300,13 @@ contract TokenMetricsVault is ERC4626, AccessControl, Pausable, ReentrancyGuard 
         return ret;
     }
 
-    function redeem(uint256 shares, address receiver, address owner) public virtual override whenNotPaused returns (uint256) {
+    function redeem(uint256 shares, address receiver, address owner)
+        public
+        virtual
+        override
+        whenNotPaused
+        returns (uint256)
+    {
         uint256 ret = super.redeem(shares, receiver, owner);
         _emitSnapshot();
         return ret;
